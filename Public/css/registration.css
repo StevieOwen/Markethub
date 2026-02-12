@@ -17,17 +17,37 @@
 .row{
     padding: 2rem;
 }
+.signin{
+    background-color: var(--primary-color);
+}
+.signin h3,.signin h4, .signin p{
+    color: var(--white-color);
+    margin-bottom: 2rem;
+}
 .signin,.signup{
     padding: 2rem;
 }
 
 .signin a{
     text-decoration: none;
-    border: 2px solid;
+    border: 2px solid var(--white-color);
     border-radius: 50px;
-    padding: 0 2rem;
+    padding: 0 1rem;
+    color: var(--white-color);
+    display: inline block;
+    transition: all 0.3s ease;
 }
-
+.signin a:hover{
+    background-color: var(--input-background--2);
+    border: 2px solid var(--input-background--2);
+    transform: translateY(-4px);
+}
+.signup{
+    border: 2px solid var(--primary-color) ;
+}
+.signup h3{
+    color: var(--primary-color);
+}
 .signup form{
     width: 90%;
     margin: 0 auto;
@@ -35,4 +55,38 @@
 
 .signup form input{
     margin-bottom: 15px;
+    transition: all 0.3s ease;
+    outline: none;
+}
+input:focus {
+  border-color: var(--primary-color); /* Your brand dark blue */
+  box-shadow: 0 0 8px rgba(0, 51, 84, 0.2); /* Soft glow for depth */
+}
+
+button[type="submit"]{
+    background-color: var(--primary-color) ;
+    border-radius: 50px;
+    padding: 0.5 2rem;
+    font-size: 1.1rem;
+    margin-left: 30px;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+}
+button[type="submit"]:hover{
+    background-color: var(--input-background--2);
+    transform: translateY(-2px);
+}
+label{
+    transform: translateX(40px);
+}
+
+
+p a{
+    color: var(--primary-color);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+p a:hover{
+   text-decoration: underline;
+    color: var(--input-background--2);
 }

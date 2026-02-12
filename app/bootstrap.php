@@ -48,7 +48,8 @@ use League\Route\Strategy\ApplicationStrategy;
     $router->get("/register",[AuthenticationController::class,"register"]);
 
     $router->get("/login",[AuthenticationController::class,"login"]);
-    
+    $router->get("/recover", [AuthenticationController::class,"recover"]);
+
     $response=$router->dispatch($request);           
 
     $emitter=new SapiEmitter();
