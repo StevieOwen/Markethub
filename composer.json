@@ -1,0 +1,16 @@
+{
+    "require": {
+        "guzzlehttp/psr7": "^2.8",
+        "league/route": "^6.2",
+        "league/plates": "^3.6",
+        "httpsoft/http-emitter": "^1.1",
+        "php-di/php-di": "^7.1",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "autoload":{
+        "psr-4":{
+            "App\\":"app/",
+            "Framework\\":"app/Framework"
+        }
+    }
+}
