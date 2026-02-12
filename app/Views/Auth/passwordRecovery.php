@@ -30,7 +30,6 @@
             <div class="container col-sm-5 signin " >
                 <div class="row">
                     <div class="col align-self-center" style="padding:1rem;">
-                    
                     <h4>Don't worry, we've got you covered.</h4>
                     <p> Enter your email and we'll send a secure link to reset your password so you can get back to shopping.</p> <br>
                     <p>Already remembered your password? No problem.</p>

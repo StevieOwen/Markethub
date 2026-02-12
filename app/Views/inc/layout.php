@@ -9,21 +9,28 @@
     <title><?=  $this->e($title) ?></title>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg bg-body-tertiary">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="#">Logo</a>      
+    
+    <div class="container" >
+        <div class="row justify-content-around" >
+            <div class="col-4">
+                <h2>Logo</h2>
+            </div>
+            <div class="col-4" >
                 <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Looking for a product" aria-label="Search"/>
+                    <input class="form-control me-2" type="search" placeholder="Look for a product" aria-label="Search"/>
                     <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
-                <div class="auth">
-                    <span id="login"><a href="/login">Login</a></span> /
-                    <span id="register"><a href="/register">Register</a></span>
+            </div>
+            <div class="col-4 auth" >
+                <div class="authbut">
+                    <span id="login"><a href="login">Login</a></span> /
+                    <span id="register"><a href="register">Register</a></span>
                 </div>
             </div>
-        </nav>
-    </header>
+        </div>
+    </div>
+
+    
 
 
  <?=   $this->section("content") ;?>

@@ -22,9 +22,14 @@ class AuthenticationController extends Controller
         return $this->render("Auth/login");;
         
     }
-     public function recover():ResponseInterface{
+    public function recover():ResponseInterface{
         
         return $this->render("Auth/passwordRecovery");;
+        
+    }
+    public function emailverification():ResponseInterface{
+        
+        return $this->render("Auth/verifyemail");;
         
     }
 

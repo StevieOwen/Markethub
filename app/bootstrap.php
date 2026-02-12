@@ -49,6 +49,8 @@ use League\Route\Strategy\ApplicationStrategy;
 
     $router->get("/login",[AuthenticationController::class,"login"]);
     $router->get("/recover", [AuthenticationController::class,"recover"]);
+    $router->get("/emailverify", [AuthenticationController::class,"emailverification"]);
+
 
     $response=$router->dispatch($request);           
 

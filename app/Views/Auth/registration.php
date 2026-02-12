@@ -20,7 +20,7 @@
             
             <div class="col-sm-7 signup">
                 <h3>Create an Account</h3><br>
-                 <form action=""> 
+                 <form action="POST"> 
                     <!-- First name -->
                      <div class=" form-floating mb-3">
                         <input style="border: 1px solid #641314; border-radius:50px;" type="text" name="firstname" value="" id="firstname" class="form-control" placeholder="First Name" aria-label="firstname" aria-describedby="firstname"  >
