@@ -37,10 +37,12 @@
     display: inline block;
     transition: all 0.3s ease;
 }
+
 .signin a:hover{
     background-color: var(--input-background--2);
     border: 2px solid var(--input-background--2);
     transform: translateY(-4px);
+    
 }
 .signup{
     border: 2px solid var(--primary-color) ;
@@ -89,4 +91,8 @@ p a{
 p a:hover{
    text-decoration: underline;
     color: var(--input-background--2);
+}
+
+.error{
+    color:var(--error)
 }

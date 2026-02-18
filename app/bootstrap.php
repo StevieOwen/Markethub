@@ -50,10 +50,16 @@ use League\Route\Strategy\ApplicationStrategy;
     $router->get("/login",[AuthenticationController::class,"login"]);
     $router->get("/recover", [AuthenticationController::class,"recover"]);
     $router->get("/emailverify", [AuthenticationController::class,"emailverification"]);
+    $router->get("/registration_process",[AuthenticationController::class,"registration_handling"]);
+    $router->post("/registration_process",[AuthenticationController::class,"registration_handling"]);
 
-
-    $response=$router->dispatch($request);           
-
+    try {
+        $response=$router->dispatch($request);           
+    } catch (Exception $e) {
+    http_response_code(405);
+    // $response = $response->withHeader('Allow', implode(', ', $e->getAllowedMethods()));
+    var_dump($e);
+    }
     $emitter=new SapiEmitter();
 
     $emitter->emit($response);

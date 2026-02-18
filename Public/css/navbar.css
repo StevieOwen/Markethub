@@ -23,36 +23,6 @@ padding: 0;
     align-items: center;
 }
 
-.authbut{
-    border: 2px solid var(--primary-color);
-    padding:0 1.1rem;
-    border-radius: 30px;
-    /* background-color: var(--primary-color); */
-}
-
-.authbut span a{
-    cursor: pointer;
-    text-decoration: none;
-    color: var(--primary-color);
-    font-size: 1.2rem;
-
-}
-
-
-.authbut #login a:hover{
-    color: var(--white-color);
-    background-color: var(--primary-color);
-    border-top-left-radius: 12px;
-    border-bottom-left-radius: 12px;
-    padding: 0 0.7rem;
-}
-.authbut #register a:hover{
-    color: var(--white-color);
-    background-color: var(--primary-color);
-    border-top-right-radius: 12px;
-    border-bottom-right-radius: 12px;
-    padding: 0 0.7rem;
-}
 
 .btn, input[type="search"]{
     border: 2px solid var(--primary-color);
@@ -66,4 +36,14 @@ input[type="search"]:focus{
 .btn:hover{
     background-color: var(--primary-color);
     color: white;
+}
+
+.authbut li a:hover{
+    background-color: var(--primary-color);
+    color: var(--white-color)!important;
+}
+.authbut li a{
+    border:2px solid var(--primary-color) !important;
+    color: black !important;
+    border-radius: 12px;
 }

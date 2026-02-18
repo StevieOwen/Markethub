@@ -1,7 +1,6 @@
 
 <?php $this->layout("/Auth/layout",["title"=>"Registration","stylename"=>"registration"]) ?>
 <!-- <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/registration.css"> -->
-
 <body>
 
     <div class="container text-center">
