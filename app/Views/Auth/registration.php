@@ -11,7 +11,8 @@ function check_error ($errors,$key){
      }
 }
 
-echo $errdb;
+// echo $errdb."<br>";
+// var_dump($cust) ;
 ?>
 
 <body>

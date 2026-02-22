@@ -13,12 +13,19 @@ use GuzzleHttp\Psr7\Header;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use PDO;
+use DateTime;
 
 class AuthenticationController extends Controller
 {
     public $errors=[];
     public $customer=[];
-    
+
+    public function test_input($data) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
+    }
     public function register():ResponseInterface
     {
        
@@ -41,13 +48,14 @@ class AuthenticationController extends Controller
         return $this->render("Auth/verifyemail");;
         
     }
+    //handle registration logic
     public function registration_handling():ResponseInterface
     { 
         $pdo = \App\Framework\DB::getConnection();
-        
+        session_start();
         $field=["cust_firstname","cust_lastname","cust_email","cust_password"];
         $customer=$customer=["cust_id"=>"","cust_firstname"=>"","cust_lastname"=>"",
-                     "cust_email"=>"","cust_password"=>""];
+                     "cust_email"=>"","cust_password"=>"", "cust_token"=>""];
                      
         $errors=[];
         $crud=new \App\Framework\CRUD($field,$customer,$errors,$_POST);
@@ -62,15 +70,19 @@ class AuthenticationController extends Controller
             }
 
             if($error==0){
-                $stm="INSERT INTO customer(cust_id,cust_firstname, cust_lastname, cust_email, cust_password,cust_createdat) VALUES(:cust_id,:cust_firstname, :cust_lastname, :cust_email, :cust_password,Now())";
+                $stm="INSERT INTO customer(cust_id,cust_firstname, cust_lastname, cust_email, cust_password,cust_createdat,cust_token,token_createdat,token_expiresat,token_used) 
+                       VALUES(:cust_id,:cust_firstname, :cust_lastname, :cust_email, :cust_password,Now(),:cust_token,Now(),DATE_ADD(NOW(), INTERVAL 30 MINUTE), :token_used)";
                 $stmt=$pdo->prepare($stm);    
                 try{
                     $stmt->execute($crud->getcustomer());
 
                     $emailService = new \App\Services\EmailService();
-                    $emailService->sendWelcomeEmail($crud->getcustomerparam("cust_email"),$crud->getcustomerparam("cust_firstname"));
-                       
-                    return $this->render("Auth/verifyemail",["customer"=>$crud->getcustomer()]);
+                    $emailService->send($crud->getcustomerparam("cust_email"),'Welcome to Market Hub - Verify Your Account',
+                     'welcome', ['name'=>$crud->getcustomerparam("cust_firstname"),'token'=>$crud->getcustomerparam("cust_token")]);
+                    // return $this->render("Auth/verifyemail",["cust_reg"=>$crud->getcustomerparam("cust_id")]);
+                    
+                    $_SESSION['customer']=$crud->getcustomerparam("cust_id");
+                    Header("Location:emailverify");
                     exit;
                 }catch (\PDOException $e) {
                     $dber=   $e->getMessage();
@@ -83,6 +95,123 @@ class AuthenticationController extends Controller
 
         return $this->render("Auth/registration");
        
+    }
+    //handle email verification logic 
+    public function emailverificationhandling():ResponseInterface
+    {
+        $pdo = \App\Framework\DB::getConnection();
+        $customer=["cust_id"=>"", "cust_email"=>"","cust_token"=>"","token"=>"","token_used"=>"","token_expiresat"=>""];
+        $token_error="";
+        if(isset($_POST['confirm'])){
+
+            $customer["cust_id"]=$_POST["cust_id"];
+            $stmt = $pdo->prepare("SELECT cust_token, token_expiresat, token_used FROM customer WHERE cust_id = :id");
+            try{
+                $stmt->execute(['id' => $customer["cust_id"]]);
+            }catch(\PDOException $e){
+                $err=$e->getMessage();
+                return $this->render("Auth/verifyemail",["err"=>$err]);
+                exit;
+            }
+            
+
+           $customer_db = $stmt->fetch(PDO::FETCH_ASSOC);
+           if ($customer_db) {
+                $customer["cust_token"]=$customer_db["cust_token"];
+                $customer["token_used"]=$customer_db["token_used"];
+                $customer["token_expiresat"]=$customer_db["token_expiresat"];
+            } else {
+             // Handle the case where the customer ID doesn't exist
+                die("Error: Customer not found.");
+            }    
+           //generate date, to check if the token expired
+           $now=new DateTime();
+           $expiresat=new Datetime($customer["token_expiresat"]);
+ 
+            if(empty($_POST['token'])){
+                $token_error="The verification code is required";
+            }else{
+                $customer['token']=$this->test_input($_POST['token']);
+            }
+
+            if(empty($token_error)){
+                if($customer["cust_token"]==$customer["token"] && $customer["token_used"]=="no" && $now<$expiresat){
+                    //update token_used ccolumn to yes 
+                    $stm="Update customer set token_used=:token_used where cust_id=:cust_id";
+                    $stmt=$pdo->prepare($stm);    
+                    $customer["token_used"]="yes";
+                try{
+                    $stmt->execute(["token_used"=>$customer["token_used"], "cust_id"=>$customer["cust_id"]]);
+                    // move to login page
+                    return $this->render("Auth/login");
+                    exit;
+                    }catch (\PDOException $e) {
+                    $dber=   $e->getMessage();
+                    return $this->render("Auth/verifyemail",["token_error"=>$dber]);
+                    }
+                    
+                }
+                elseif($customer["cust_token"]!=$customer["token"]){
+                    $error="Verification code is not correct";
+                    return $this->render("Auth/verifyemail",["token_error"=>$error]);
+                }
+                elseif($now>$expiresat || $customer["token_used"]=="yes"){
+                     $error="The verification code expired!"."<br>"."Generate a new one by clicking the 'send code' button on the left side panel";
+                     return $this->render("Auth/verifyemail",["token_error"=>$error]);   
+                }    
+            }
+            else{
+                return $this->render("Auth/verifyemail",["token_error"=>$token_error]);
+            }
+            return $this->render("Auth/verifyemail");
+
+        }
+    //resend token if expired
+        if(isset($_POST['send_code'])){
+        
+            $pdo = \App\Framework\DB::getConnection();
+            $customer=["cust_id"=>"","cust_token"=>"","token_used"=>"no","cust_email"=>"","cust_firstname"=>""];
+            $customer["cust_id"]=$_POST["cust_id1"];
+            //fetch email and first name from DB
+            $stmt = $pdo->prepare("SELECT cust_email, cust_firstname FROM customer WHERE cust_id = :id");
+            $stmt->execute(['id' => $customer["cust_id"]]);
+
+            $customer_db = $stmt->fetch(PDO::FETCH_ASSOC);
+            if($customer_db){
+                $customer["cust_email"]=$customer_db["cust_email"];
+                $customer["cust_firstname"]=$customer_db["cust_firstname"];
+            }else {
+             // Handle the case where the customer ID doesn't exist
+                die("Error: Customer not found.");
+            }       
+            $customer["cust_token"]=random_int(100000,999999);
+            //Update token and relative infos
+            $stm="UPDATE customer set cust_token=:cust_token,token_createdat=Now(),
+                  token_expiresat=DATE_ADD(NOW(),INTERVAL 30 MINUTE),token_used=:token_used where cust_id=:cust_id"; 
+            $stmt=$pdo->prepare($stm);    
+                try{
+                    $stmt->execute(["cust_token"=>$customer['cust_token'],"token_used"=>$customer['token_used'],"cust_id"=>$customer["cust_id"]]);
+                    //send email with new token
+                    $emailService = new \App\Services\EmailService();
+                    try{
+                        $emailService->send($customer['cust_email'],'Welcome to Market Hub - Verify Your Account',
+                     'welcome', ['name'=>$customer['cust_firstname'],'token'=>$customer['cust_token']]);
+                     $success="We sent a new verification code to ".$customer['cust_email'];
+                    return $this->render("Auth/verifyemail",["customer"=>$customer['cust_id'],"success"=>""]);
+                    exit;
+                     }catch(Exception $e){
+                     return $this->render("Auth/verifyemail",["error"=>$e]);
+                    }
+        
+                }catch (\PDOException $e) {
+                    $dber=   $e->getMessage();
+                    return $this->render("Auth/verifyemail",["errdb"=>$dber]);
+                }      
+
+            return $this->render("Auth/verifyemail") ;
+        }
+
+        return $this->render("Auth/verifyemail") ;
     }
 
    

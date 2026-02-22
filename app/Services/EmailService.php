@@ -1,10 +1,5 @@
 <?php
 namespace App\Services;
-ob_start();
-include __DIR__ . '/../Views/Emails/welcome.php';
-$mail->Body = ob_get_clean();
-
-namespace App\Services;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -14,8 +9,6 @@ class EmailService {
 
     public function __construct() {
         $this->mail = new PHPMailer(true);
-        
-        // Server settings
         $this->mail->isSMTP();
         $this->mail->Host       = $_ENV['MAIL_HOST'];
         $this->mail->SMTPAuth   = true;
@@ -25,23 +18,36 @@ class EmailService {
                                   ? PHPMailer::ENCRYPTION_STARTTLS 
                                   : PHPMailer::ENCRYPTION_SMTPS;
         $this->mail->Port       = $_ENV['MAIL_PORT'];
-
-        // Default Sender
         $this->mail->setFrom($_ENV['MAIL_FROM_ADDRESS'], $_ENV['MAIL_FROM_NAME']);
     }
 
-    public function sendWelcomeEmail($toEmail, $toName) {
+    /**
+     * @param string $toEmail Recipient email
+     * @param string $subject Email subject
+     * @param string $template The filename in Views/Emails/ (e.g., 'welcome')
+     * @param array $data Associative array of variables to pass to the template
+     */
+    public function send($toEmail, $subject, $template, $data = []) {
         try {
-            $this->mail->addAddress($toEmail, $toName);
+            $this->mail->clearAddresses();
+            $this->mail->addAddress($toEmail);
             $this->mail->isHTML(true);
-            $this->mail->Subject = 'Welcome to Market Hub!';
-            
-            // Example: Using a separate HTML file for the email body
-            $this->mail->Body = "<h1>Welcome, $toName!</h1><p>Your account is ready.</p>";
+            $this->mail->Subject = $subject;
+
+            // Extract the array so variables like $token or $name are available in the view
+            extract($data);
+
+            ob_start();
+            $templatePath = __DIR__ . "/../Views/Emails/{$template}.php";
+            if (file_exists($templatePath)) {
+                include $templatePath;
+            } else {
+                throw new \Exception("Email template {$template} not found.");
+            }
+            $this->mail->Body = ob_get_clean();
 
             return $this->mail->send();
         } catch (Exception $e) {
-            // Log the error for debugging
             error_log("Mailer Error: " . $this->mail->ErrorInfo);
             return false;
         }

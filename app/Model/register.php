@@ -74,3 +74,61 @@
     
 
 ?>
+
+
+//Mail
+
+<?php
+namespace App\Services;
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+class EmailService {
+    protected $mail;
+
+    public function __construct() {
+        // This is where $this->mail is actually born!
+        $this->mail = new PHPMailer(true);
+        
+        // Server settings
+        $this->mail->isSMTP();
+        $this->mail->Host       = $_ENV['MAIL_HOST'];
+        $this->mail->SMTPAuth   = true;
+        $this->mail->Username   = $_ENV['MAIL_USERNAME'];
+        $this->mail->Password   = $_ENV['MAIL_PASSWORD'];
+        $this->mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'] === 'tls' 
+                                  ? PHPMailer::ENCRYPTION_STARTTLS 
+                                  : PHPMailer::ENCRYPTION_SMTPS;
+        $this->mail->Port       = $_ENV['MAIL_PORT'];
+
+        // Default Sender
+        $this->mail->setFrom($_ENV['MAIL_FROM_ADDRESS'], $_ENV['MAIL_FROM_NAME']);
+    }
+
+    public function sendWelcomeEmail($toEmail, $toName, $token) {
+        try {
+            // Clear recipients in case this service is used multiple times in one request
+            $this->mail->clearAddresses(); 
+            
+            $this->mail->addAddress($toEmail, $toName);
+            $this->mail->isHTML(true);
+            $this->mail->Subject = 'Verify your Market Hub Account';
+
+            // These variables will be available inside your welcome.php file
+            $name = $toName;
+            $verificationToken = $token; 
+            
+            ob_start();
+            include __DIR__ . '/../Views/Emails/welcome.php';
+            $body = ob_get_clean();
+
+            $this->mail->Body = $body;
+
+            return $this->mail->send();
+        } catch (Exception $e) {
+            error_log("Mailer Error: " . $this->mail->ErrorInfo);
+            return false;
+        }
+    }
+}

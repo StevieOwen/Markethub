@@ -7,7 +7,7 @@ use Framework\DB;
 class CRUD{
     private $field=["cust_firstname","cust_lastname","cust_email","cust_password"];
     private $customer=["cust_id"=>"","cust_firstname"=>"","cust_lastname"=>"",
-                     "cust_email"=>"","cust_password"=>""];
+                     "cust_email"=>"","cust_password"=>"","cust_token"=>"","token_used"=>""];
 
     private $errors=[];
     private $input=["cust_id"=>"","cust_firstname"=>"","cust_lastname"=>"","cust_email"=>"","cust_password"=>""];
@@ -19,6 +19,12 @@ class CRUD{
        $this->errors=$errors;
        $this->input=$input;
     }
+    public function test_input($data) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
+    }
     public  function geterrors(){
         return $this->errors;
     }
@@ -29,7 +35,7 @@ class CRUD{
                 if(empty($this->input[$this->field[$i]])){
                     $this->errors[$this->field[$i]]=str_replace("cust_", "", $this->field[$i]) . " is required";;      
                 }else{
-                    $this->customer[$this->field[$i]]=$this->input[$this->field[$i]];
+                    $this->customer[$this->field[$i]]=$this->test_input($this->input[$this->field[$i]]);
                 }  
         }
         // Check password strenght
@@ -51,6 +57,11 @@ class CRUD{
 
         //Generate ID
         $this->customer["cust_id"]="cust_".random_int(100000,999999);
+        //Generate token 
+        $this->customer["cust_token"] =random_int(100000,999999) ;
+        
+        $this->customer["token_used"]="no";
+        // hashing password
         if(empty($this->errors["cust_password"])){
             $this->customer['cust_password'] = password_hash($this->customer['cust_password'], PASSWORD_DEFAULT);
         }
