@@ -56,6 +56,12 @@ use League\Route\Strategy\ApplicationStrategy;
     $router->get("/emailverification_process",[AuthenticationController::class,"emailverificationhandling"]);
     $router->post("/emailverification_process",[AuthenticationController::class,"emailverificationhandling"]);
 
+    $router->get("/loginprocess",[AuthenticationController::class,"loginhandling"]);
+    $router->post("/loginprocess",[AuthenticationController::class,"loginhandling"]);
+
+     $router->get("/user_home",[AuthenticationController::class,"userindex"]);
+
+
     try {
         $response=$router->dispatch($request);           
     } catch (Exception $e) {

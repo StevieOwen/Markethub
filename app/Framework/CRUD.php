@@ -7,7 +7,7 @@ use Framework\DB;
 class CRUD{
     private $field=["cust_firstname","cust_lastname","cust_email","cust_password"];
     private $customer=["cust_id"=>"","cust_firstname"=>"","cust_lastname"=>"",
-                     "cust_email"=>"","cust_password"=>"","cust_token"=>"","token_used"=>""];
+                     "cust_email"=>"","cust_password"=>"","cust_token"=>"","token_used"=>"","email_verified"=>""];
 
     private $errors=[];
     private $input=["cust_id"=>"","cust_firstname"=>"","cust_lastname"=>"","cust_email"=>"","cust_password"=>""];
@@ -61,6 +61,7 @@ class CRUD{
         $this->customer["cust_token"] =random_int(100000,999999) ;
         
         $this->customer["token_used"]="no";
+        $this->customer["email_verified"]="no";
         // hashing password
         if(empty($this->errors["cust_password"])){
             $this->customer['cust_password'] = password_hash($this->customer['cust_password'], PASSWORD_DEFAULT);

@@ -48,14 +48,20 @@ class AuthenticationController extends Controller
         return $this->render("Auth/verifyemail");;
         
     }
+    public function userindex():ResponseInterface{
+        
+        return $this->render("home/index1");;
+        
+    }
+
     //handle registration logic
     public function registration_handling():ResponseInterface
     { 
         $pdo = \App\Framework\DB::getConnection();
         session_start();
         $field=["cust_firstname","cust_lastname","cust_email","cust_password"];
-        $customer=$customer=["cust_id"=>"","cust_firstname"=>"","cust_lastname"=>"",
-                     "cust_email"=>"","cust_password"=>"", "cust_token"=>""];
+        $customer=["cust_id"=>"","cust_firstname"=>"","cust_lastname"=>"",
+                     "cust_email"=>"","cust_password"=>"", "cust_token"=>"","email_verified"=>""];
                      
         $errors=[];
         $crud=new \App\Framework\CRUD($field,$customer,$errors,$_POST);
@@ -70,8 +76,8 @@ class AuthenticationController extends Controller
             }
 
             if($error==0){
-                $stm="INSERT INTO customer(cust_id,cust_firstname, cust_lastname, cust_email, cust_password,cust_createdat,cust_token,token_createdat,token_expiresat,token_used) 
-                       VALUES(:cust_id,:cust_firstname, :cust_lastname, :cust_email, :cust_password,Now(),:cust_token,Now(),DATE_ADD(NOW(), INTERVAL 30 MINUTE), :token_used)";
+                $stm="INSERT INTO customer(cust_id,cust_firstname, cust_lastname, cust_email, cust_password,cust_createdat,cust_token,token_createdat,token_expiresat,token_used,email_verified) 
+                       VALUES(:cust_id,:cust_firstname, :cust_lastname, :cust_email, :cust_password,Now(),:cust_token,Now(),DATE_ADD(NOW(), INTERVAL 30 MINUTE), :token_used,:email_verified)";
                 $stmt=$pdo->prepare($stm);    
                 try{
                     $stmt->execute($crud->getcustomer());
@@ -100,7 +106,7 @@ class AuthenticationController extends Controller
     public function emailverificationhandling():ResponseInterface
     {
         $pdo = \App\Framework\DB::getConnection();
-        $customer=["cust_id"=>"", "cust_email"=>"","cust_token"=>"","token"=>"","token_used"=>"","token_expiresat"=>""];
+        $customer=["cust_id"=>"", "cust_email"=>"","cust_token"=>"","token"=>"","token_used"=>"","token_expiresat"=>"","email_verified"=>""];
         $token_error="";
         if(isset($_POST['confirm'])){
 
@@ -137,11 +143,12 @@ class AuthenticationController extends Controller
             if(empty($token_error)){
                 if($customer["cust_token"]==$customer["token"] && $customer["token_used"]=="no" && $now<$expiresat){
                     //update token_used ccolumn to yes 
-                    $stm="Update customer set token_used=:token_used where cust_id=:cust_id";
+                    $stm="Update customer set token_used=:token_used, email_verified=:email_verified where cust_id=:cust_id";
                     $stmt=$pdo->prepare($stm);    
                     $customer["token_used"]="yes";
+                    $customer["email_verified"]="yes";
                 try{
-                    $stmt->execute(["token_used"=>$customer["token_used"], "cust_id"=>$customer["cust_id"]]);
+                    $stmt->execute(["token_used"=>$customer["token_used"], "email_verified"=>$customer["email_verified"], "cust_id"=>$customer["cust_id"]]);
                     // move to login page
                     return $this->render("Auth/login");
                     exit;
@@ -214,5 +221,74 @@ class AuthenticationController extends Controller
         return $this->render("Auth/verifyemail") ;
     }
 
-   
+    //handle login
+    public function loginhandling():ResponseInterface
+    {
+        $pdo = \App\Framework\DB::getConnection();
+
+        $customer=["cust_email"=>"","cust_passwordd"=>""];
+        $customerdb=["cust_id"=>"", "cust_password"=>"", "email_verified"=>""];
+        $errors=['cust_email','cust_pwd'];
+        if(isset($_POST["login"])){
+            
+            if(empty($_POST['cust_email'])){
+                $errors['cust_email']="Email is required";
+            }else{
+                $customer['cust_email']=$this->test_input($_POST['cust_email']);
+            }
+            
+            if(empty($_POST['cust_password'])){
+                $errors['cust_pwd']="Password is required";
+            }else{
+                $customer['cust_password']=$this->test_input($_POST['cust_password']);
+            }
+        
+            $error=0;
+            foreach($errors as $err){
+                if(!empty($err)){
+                    $error+=1;
+                }
+            }
+
+            if($error==0){
+                $stmt = $pdo->prepare("SELECT cust_id, cust_password,email_verified FROM customer WHERE cust_email = :email");
+                $stmt->execute(['email' => $customer["cust_email"]]);
+
+                $customer_db = $stmt->fetch(PDO::FETCH_ASSOC);
+                if($customer_db){
+                    $customerdb["cust_id"]=$customer_db["cust_id"];
+                    $customerdb["cust_password"]=$customer_db["cust_password"];
+                    $customerdb['email_verified']=$customer_db["email_verified"];
+                }else {
+                // Handle the case where the customer ID doesn't exist
+                    return $this->render("Auth/login",["error"=>"User not found, please register first"]);
+                    exit;
+                }       
+
+                //login logic
+                if($customerdb['email_verified']=="yes" && password_verify($customer["cust_password"], $customerdb['cust_password'])){
+                    session_start();
+                    $_SESSION['cust_id']=$customerdb["cust_id"];
+                    Header("Location:user_home");   
+                }elseif(!password_verify($customer["cust_password"], $customerdb['cust_password'])){
+                    return $this->render("Auth/login",["error"=>"Password is incorrect"]);
+                    exit;
+                }elseif($customerdb['email_verified']=="no"){
+                    return $this->render("Auth/emailverify",["erremail"=>"Verify your email first"]);
+                    exit;
+                }
+                
+            }else{
+                return $this->render("Auth/login",["errors"=>$errors]);
+                exit;
+            }
+        }    
+
+        if(isset($_POST[''])){
+            
+        }
+
+        return $this->render("Auth/login");
+    }
 }
+

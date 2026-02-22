@@ -7,12 +7,12 @@
  $token_error=$token_error ?? "";
  $success=$success ?? "";
  $error=$error ?? "";
+ $erremail=$erremail ?? "";
  if(isset($_SESSION['customer'])){
     $cust_reg=$_SESSION['customer'];
     // echo $cust_reg;
-   
  }else{
-    echo "not set";
+   
  }  
 
 echo $error;
@@ -42,6 +42,7 @@ echo $error;
                 <h3>Verify your email</h3><br>
                  <form action="emailverification_process" method="POST"> 
                     <!-- First name -->
+                     <p class="error"><?php echo $erremail; ?></p>
                      <p class="error"><?php echo $token_error; ?></p>
                      <div class=" form-floating mb-3">
                         <input style="border: 1px solid #641314; border-radius:50px;" type="text" name="token" value="" id="token" class="form-control" placeholder="Token" aria-label="firstname" aria-describedby="firstname"  >
