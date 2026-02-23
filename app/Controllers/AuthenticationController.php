@@ -40,7 +40,7 @@ class AuthenticationController extends Controller
     }
     public function recover():ResponseInterface{
         
-        return $this->render("Auth/passwordRecovery");;
+        return $this->render("Auth/recoverpassword/passwordRecovery");;
         
     }
     public function emailverification():ResponseInterface{
@@ -204,7 +204,7 @@ class AuthenticationController extends Controller
                         $emailService->send($customer['cust_email'],'Welcome to Market Hub - Verify Your Account',
                      'welcome', ['name'=>$customer['cust_firstname'],'token'=>$customer['cust_token']]);
                      $success="We sent a new verification code to ".$customer['cust_email'];
-                    return $this->render("Auth/verifyemail",["customer"=>$customer['cust_id'],"success"=>""]);
+                    return $this->render("Auth/verifyemail",["customer"=>$customer['cust_id'],"success"=>$success]);
                     exit;
                      }catch(Exception $e){
                      return $this->render("Auth/verifyemail",["error"=>$e]);
@@ -226,11 +226,9 @@ class AuthenticationController extends Controller
     {
         $pdo = \App\Framework\DB::getConnection();
 
-        $customer=["cust_email"=>"","cust_passwordd"=>""];
-        $customerdb=["cust_id"=>"", "cust_password"=>"", "email_verified"=>""];
-        $errors=['cust_email','cust_pwd'];
+        $customer=["cust_email"=>"","cust_password"=>""];
+        $errors=['cust_email'=>"",'cust_pwd'=>""];
         if(isset($_POST["login"])){
-            
             if(empty($_POST['cust_email'])){
                 $errors['cust_email']="Email is required";
             }else{
@@ -243,37 +241,33 @@ class AuthenticationController extends Controller
                 $customer['cust_password']=$this->test_input($_POST['cust_password']);
             }
         
-            $error=0;
+            $missing_input=0;
             foreach($errors as $err){
                 if(!empty($err)){
-                    $error+=1;
+                    $missing_input+=1;
                 }
             }
-
-            if($error==0){
+            if($missing_input==0){
                 $stmt = $pdo->prepare("SELECT cust_id, cust_password,email_verified FROM customer WHERE cust_email = :email");
                 $stmt->execute(['email' => $customer["cust_email"]]);
-
                 $customer_db = $stmt->fetch(PDO::FETCH_ASSOC);
-                if($customer_db){
-                    $customerdb["cust_id"]=$customer_db["cust_id"];
-                    $customerdb["cust_password"]=$customer_db["cust_password"];
-                    $customerdb['email_verified']=$customer_db["email_verified"];
-                }else {
-                // Handle the case where the customer ID doesn't exist
+                
+                if(!$customer_db){
+                    // Handle the case where the customer ID doesn't exist
                     return $this->render("Auth/login",["error"=>"User not found, please register first"]);
                     exit;
-                }       
-
+                }     
+            
                 //login logic
-                if($customerdb['email_verified']=="yes" && password_verify($customer["cust_password"], $customerdb['cust_password'])){
+                if($customer_db['email_verified']=="yes" && password_verify($customer["cust_password"], $customer_db['cust_password'])){
                     session_start();
-                    $_SESSION['cust_id']=$customerdb["cust_id"];
-                    Header("Location:user_home");   
-                }elseif(!password_verify($customer["cust_password"], $customerdb['cust_password'])){
+                    $_SESSION['cust_id']=$customer_db["cust_id"];
+                    Header("Location:user_home"); 
+                    exit;  
+                }elseif(!password_verify($customer["cust_password"], $customer_db['cust_password'])){
                     return $this->render("Auth/login",["error"=>"Password is incorrect"]);
                     exit;
-                }elseif($customerdb['email_verified']=="no"){
+                }elseif($customer_db['email_verified']=="no"){
                     return $this->render("Auth/emailverify",["erremail"=>"Verify your email first"]);
                     exit;
                 }
@@ -290,5 +284,226 @@ class AuthenticationController extends Controller
 
         return $this->render("Auth/login");
     }
+
+    // handle password recovery
+    public function passwordrecovery():ResponseInterface
+    {   
+        $pdo = \App\Framework\DB::getConnection();
+        $customer=["cust_id"=>"","cust_token"=>"","token_used"=>"no","cust_email"=>"","cust_firstname"=>""];
+        $error="";
+        if(isset($_POST['recover'])){
+            if(empty($_POST['email'])){
+                $error="Email is required";
+            }else{
+                $customer["cust_email"]=$this->test_input($_POST['email']);
+            }
+
+            if(empty($error)){
+                $stmt = $pdo->prepare("SELECT cust_id,cust_firstname FROM customer WHERE cust_email = :email");
+                $stmt->execute(['email' => $customer["cust_email"]]);
+                $customer_db = $stmt->fetch(PDO::FETCH_ASSOC);
+                if(!$customer_db){
+                    // Handle the case where the customer ID doesn't exist
+                    return $this->render("Auth/recoverpassword/passwordRecovery",["error"=>"User not found, please register first"]);
+                    exit;
+                }else{
+                    $customer["cust_token"]=random_int(100000,999999);
+                    //Update token and relative infos
+                    $stm="UPDATE customer set cust_token=:cust_token,token_createdat=Now(),
+                        token_expiresat=DATE_ADD(NOW(),INTERVAL 30 MINUTE),token_used=:token_used where cust_id=:cust_id"; 
+                    $stmt=$pdo->prepare($stm);    
+                    try{
+                    $stmt->execute(["cust_token"=>$customer['cust_token'],"token_used"=>$customer['token_used'],"cust_id"=>$customer_db["cust_id"]]);
+                    //send email with new token
+                    $emailService = new \App\Services\EmailService();
+                    try{
+                        $emailService->send($customer['cust_email'],'Recover your password- Verify Your Account',
+                     'recovery', ['name'=>$customer_db['cust_firstname'],'token'=>$customer['cust_token']]);
+                     session_start();
+                     $_SESSION['cust_id']=$customer_db['cust_id'];
+                     Header("Location:verificationemail");
+                    // return $this->render("Auth/recoverpassword/emailverify",["cust_id"=>$customer_db['cust_id']]);
+                    exit;
+                     }catch(Exception $e){
+                     return $this->render("Auth/recoverpassword/passwordRecovery",["error"=>$e]);
+                    }
+        
+                }catch (\PDOException $e) {
+                    $dber=   $e->getMessage();
+                    return $this->render("Auth/recoverpassword/passwordRecovery",["errdb"=>$dber]);
+                }   
+                    return $this->render("Auth/recoverpassword/emailverify",["cust_id"=>$customer_db["cust_id"]]);
+                    exit;
+                }
+                
+            }else{
+                 return $this->render("Auth/recoverpassword/passwordRecovery",["error"=>$error]);
+            }
+            
+        }
+        return $this->render("Auth/recoverpassword/passwordRecovery");
+    } 
+
+
+    //handle email verification logic for password recovery
+    public function verificationemail():ResponseInterface
+    {
+        $pdo = \App\Framework\DB::getConnection();
+        $customer=["cust_id"=>"", "cust_email"=>"","cust_token"=>"","token"=>"","token_used"=>"","token_expiresat"=>"","email_verified"=>""];
+        $token_error="";
+        if(isset($_POST['confirm'])){
+
+            $customer["cust_id"]=$_POST["cust_id"];
+
+            $stmt = $pdo->prepare("SELECT cust_token, token_expiresat, token_used FROM customer WHERE cust_id = :id");
+            try{
+                $stmt->execute(['id' => $customer["cust_id"]]);
+            }catch(\PDOException $e){
+                $err=$e->getMessage();
+                return $this->render("Auth/recoverpassword/emailverify",["err"=>$err]);
+                exit;
+            }
+            
+
+           $customer_db = $stmt->fetch(PDO::FETCH_ASSOC);
+           if ($customer_db) {
+                $customer["cust_token"]=$customer_db["cust_token"];
+                $customer["token_used"]=$customer_db["token_used"];
+                $customer["token_expiresat"]=$customer_db["token_expiresat"];
+            } else {
+             // Handle the case where the customer ID doesn't exist
+                die("Error: Customer not found.");
+            }    
+           //generate date, to check if the token expired
+           $now=new DateTime();
+           $expiresat=new Datetime($customer["token_expiresat"]);
+ 
+            if(empty($_POST['token'])){
+                $token_error="The verification code is required";
+            }else{
+                $customer['token']=$this->test_input($_POST['token']);
+            }
+
+            if(empty($token_error)){
+                if($customer["cust_token"]==$customer["token"] && $customer["token_used"]=="no" && $now<$expiresat){
+                    //update token_used ccolumn to yes 
+                    $stm="Update customer set token_used=:token_used, email_verified=:email_verified where cust_id=:cust_id";
+                    $stmt=$pdo->prepare($stm);    
+                    $customer["token_used"]="yes";
+                    $customer["email_verified"]="yes";
+                try{
+                    $stmt->execute(["token_used"=>$customer["token_used"], "email_verified"=>$customer["email_verified"], "cust_id"=>$customer["cust_id"]]);
+                    // move to login page
+                    return $this->render("Auth/recoverpassword/changepassword",["cust_id"=>$customer["cust_id"]]);
+                    exit;
+                    }catch (\PDOException $e) {
+                    $dber=   $e->getMessage();
+                    return $this->render("Auth/recoverpassword/emailverify",["token_error"=>$dber]);
+                    }
+                    
+                }
+                elseif($customer["cust_token"]!=$customer["token"]){
+                    $error="Verification code is not correct";
+                    return $this->render("Auth/recoverpassword/emailverify",["token_error"=>$error]);
+                }
+                elseif($now>$expiresat || $customer["token_used"]=="yes"){
+                     $error="The verification code expired!"."<br>"."Generate a new one by clicking the 'send code' button on the left side panel";
+                     return $this->render("Auth/recoverpassword/emailverify",["token_error"=>$error]);   
+                }    
+            }
+            else{
+                return $this->render("Auth/recoverpassword/emailverify",["token_error"=>$token_error]);
+            }
+            return $this->render("Auth/recoverpassword/emailverify");
+
+        }
+    //resend token if expired
+        if(isset($_POST['send_code'])){
+        
+            $pdo = \App\Framework\DB::getConnection();
+            $customer=["cust_id"=>"","cust_token"=>"","token_used"=>"no","cust_email"=>"","cust_firstname"=>""];
+            $customer["cust_id"]=$_POST["cust_id1"];
+            //fetch email and first name from DB
+            $stmt = $pdo->prepare("SELECT cust_email, cust_firstname FROM customer WHERE cust_id = :id");
+            $stmt->execute(['id' => $customer["cust_id"]]);
+
+            $customer_db = $stmt->fetch(PDO::FETCH_ASSOC);
+            if($customer_db){
+                $customer["cust_email"]=$customer_db["cust_email"];
+                $customer["cust_firstname"]=$customer_db["cust_firstname"];
+            }else {
+             // Handle the case where the customer ID doesn't exist
+                die("Error: Customer not found.");
+            }       
+            $customer["cust_token"]=random_int(100000,999999);
+            //Update token and relative infos
+            $stm="UPDATE customer set cust_token=:cust_token,token_createdat=Now(),
+                  token_expiresat=DATE_ADD(NOW(),INTERVAL 30 MINUTE),token_used=:token_used where cust_id=:cust_id"; 
+            $stmt=$pdo->prepare($stm);    
+                try{
+                    $stmt->execute(["cust_token"=>$customer['cust_token'],"token_used"=>$customer['token_used'],"cust_id"=>$customer["cust_id"]]);
+                    //send email with new token
+                    $emailService = new \App\Services\EmailService();
+                    try{
+                        $emailService->send($customer['cust_email'],'Welcome to Market Hub - Verify Your Account',
+                     'welcome', ['name'=>$customer['cust_firstname'],'token'=>$customer['cust_token']]);
+                     $success="We sent a new verification code to ".$customer['cust_email'];
+                    return $this->render("Auth/recoverpassword/emailverify",["customer"=>$customer['cust_id'],"success"=>$success]);
+                    exit;
+                     }catch(Exception $e){
+                     return $this->render("Auth/recoverpassword/emailverify",["error"=>$e]);
+                    }
+        
+                }catch (\PDOException $e) {
+                    $dber= $e->getMessage();
+                    return $this->render("Auth/recoverpassword/emailverify",["errdb"=>$dber]);
+                }      
+
+            return $this->render("Auth/recoverpassword/emailverify") ;
+        }
+
+        return $this->render("Auth/recoverpassword/emailverify") ;
+    }
+
+    public function changepassword():ResponseInterface
+    {
+        $pdo = \App\Framework\DB::getConnection();
+        $customer=["cust_id"=>"", "cust_password"=>""];
+        $error="";
+        $customer["cust_id"]=$_POST['cust_id'];
+        if(isset($_POST['reset'])){
+            if(empty($_POST['password'])){
+                $error="Password is required";
+            }else{
+                $customer["cust_password"]=$this->test_input($_POST['password']);
+            }
+
+            if(empty($error)){
+                // Check password strenght
+                $pattern = '/^(?=.*[A-Z])(?=.*[*@&%!#$^()_+=<>?]).{8,}$/';
+                if (!preg_match($pattern, $customer["cust_password"])){
+                     return $this->render("Auth/recoverpassword/changepassword",["error"=>"Password must be at least 8 characters long, 1 capital letter, and 1 special character (*, @, &, %, !)."]);
+                     exit;
+                }else{
+                    $customer["cust_password"]=password_hash($customer['cust_password'], PASSWORD_DEFAULT);
+
+                    $stm="UPDATE customer set cust_password=:cust_password where cust_id=:cust_id"; 
+                    $stmt=$pdo->prepare($stm);    
+                    $stmt->execute(["cust_password"=>$customer['cust_password'],"cust_id"=>$customer["cust_id"]]);
+                    return $this->render("Auth/login");
+                    exit;            
+                }
+   
+
+            }else{
+                 return $this->render("Auth/recoverpassword/changepassword",["error"=>$error]);
+            }
+
+             return $this->render("Auth/login");
+        }
+        return $this->render("Auth/login") ;
+    }
+
+
 }
 

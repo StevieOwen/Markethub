@@ -1,7 +1,10 @@
 
 <?php $this->layout("/Auth/layout",["title"=>"Registration","stylename"=>"registration"]) ?>
 <!-- <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/registration.css"> -->
+<?php
+$error=$error?? "";
 
+?>
 <body>
 
     <div class="container text-center">
@@ -12,15 +15,17 @@
                 <div class="row">
                     <div class="col align-self-center">
                         <h3>Recover Your password</h3><br>
-                        <form action=""> 
+                        <form action="passwordrecovery" method="post"> 
                             <!-- Email -->
+                             <p class="error"><?php echo $error ?></p>
                             <div class=" form-floating  mb-3">
                                 <input style="border: 1px solid #641314;border-radius:50px;" type="email" id="email" name="email" value="" class="form-control" placeholder="Email" aria-label="email" aria-describedby="email">
                                 <label for="email">Email</label>  
-                            </div> <br>
+                            </div> 
+                            <br>
                             
                             <div class="col-12">
-                                <button  class="btn btn-primary" type="submit">Verify Email</button>
+                                <button  class="btn btn-primary" name="recover" type="submit">Verify Email</button>
                             </div> <br>
                         </form> 
                     </div>

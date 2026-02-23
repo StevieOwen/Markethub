@@ -6,13 +6,12 @@
 $error=$error ?? "";
 $errors['cust_email']=$errors['cust_email'] ?? "";
 $errors['cust_password']=$errors['cust_pwd'] ?? "";
+
 ?>
 <body>
 
     <div class="container text-center">
-        <div class="row ">
-            
-            
+        <div class="row ">   
             <div class="col-sm-7 signup">
                 <h3>Login Here</h3><br>
                 <form action="loginprocess" method="POST"> 
@@ -34,7 +33,7 @@ $errors['cust_password']=$errors['cust_pwd'] ?? "";
                      <div class="col-12">
                         <button  class="btn btn-primary" name="login" type="submit">SIGN IN</button>
                     </div> <br>
-                    <p>Forgot your Password? <a href="recover">Recover it!</a></p>
+                    <p>Forgot your Password? <a href="recoverpassword">Recover it!</a></p>
                 </form> 
                 
             </div>

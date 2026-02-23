@@ -48,7 +48,7 @@ use League\Route\Strategy\ApplicationStrategy;
     $router->get("/register",[AuthenticationController::class,"register"]);
 
     $router->get("/login",[AuthenticationController::class,"login"]);
-    $router->get("/recover", [AuthenticationController::class,"recover"]);
+    $router->get("/recoverpassword", [AuthenticationController::class,"recover"]);
     $router->get("/emailverify", [AuthenticationController::class,"emailverification"]);
     $router->get("/registration_process",[AuthenticationController::class,"registration_handling"]);
     $router->post("/registration_process",[AuthenticationController::class,"registration_handling"]);
@@ -59,8 +59,15 @@ use League\Route\Strategy\ApplicationStrategy;
     $router->get("/loginprocess",[AuthenticationController::class,"loginhandling"]);
     $router->post("/loginprocess",[AuthenticationController::class,"loginhandling"]);
 
-     $router->get("/user_home",[AuthenticationController::class,"userindex"]);
+    $router->get("/user_home",[AuthenticationController::class,"userindex"]);
+    $router->get("/passwordrecovery",[AuthenticationController::class,"passwordrecovery"]);
+    $router->post("/passwordrecovery",[AuthenticationController::class,"passwordrecovery"]);
 
+    $router->get("/verificationemail",[AuthenticationController::class,"verificationemail"]);
+    $router->post("/verificationemail",[AuthenticationController::class,"verificationemail"]);
+    
+    $router->get("/changepassword",[AuthenticationController::class,"changepassword"]);
+    $router->post("/changepassword",[AuthenticationController::class,"changepassword"]);
 
     try {
         $response=$router->dispatch($request);           
