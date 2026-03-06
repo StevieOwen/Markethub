@@ -71,17 +71,25 @@ fetch(`/renderproducts`)
     
     items.forEach((item)=>{
         const prod_img=`<img src="${URLROOT}/uploads/items/${item['img_name']}" class="img-fluid w-100" alt="Product">`;
-        product_grid.innerHTML+=`<div class="col-12 col-6 col-lg-4">
-                                    <div class="product-card border-0">
-                                        <div class="position-relative overflow-hidden bg-light rounded">
-                                            <!-- <span class="badge bg-danger position-absolute m-2">Hot</span> -->
-                                            ${prod_img}
-                                            <button class="btn btn-white position-absolute bottom-0 start-50 translate-middle-x mb-2 shadow-sm w-75 opacity-0 btn-quickview">Quick View</button>
+        
+        product_grid.innerHTML+=`<div class="col-12 col-md-6 col-lg-4 mb-4">
+                                    <div class="product-card h-100 border-0 shadow-hover">
+                                        <div class="card-img-container position-relative overflow-hidden rounded">
+                                            <span class="badge bg-danger position-absolute top-0 start-0 m-2">Hot</span>
+                                            <div class="img-wrapper">
+                                                ${prod_img}
+                                            </div>
+                                            class="btn btn-white position-absolute bottom-0 start-50 translate-middle-x mb-2 shadow-sm w-75 opacity-0 btn-quickview
                                         </div>
-                                        <div class="pt-3">
-                                            <h6 class="mb-1 fw-bold">${item['item_name']}</h6>
-                                            <p class="text-primary fw-bold mb-1">${item['item_price']}</p>
-                                            <div class="text-warning small">★★★★☆ <span class="text-muted">(2 reviews)</span></div>
+
+                                        <div class="card-body px-0 pt-3">
+                                            <h6 class="product-title text-dark mb-1 fw-bold">${item['item_name']}</h6>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <p class="product-price text-primary fw-bold mb-0">$${item['item_price']}</p>
+                                                <div class="rating-stars text-warning x-small">
+                                                    ★★★★☆ <span class="text-muted ms-1">(2)</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>`

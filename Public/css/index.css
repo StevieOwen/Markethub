@@ -106,9 +106,76 @@ body{
     color: #666;
 }
 .offcanvas-body {
-    overflow-y: auto; /* Ensure you can scroll the categories */
+    overflow-y: auto; /* Ensure  scroll the categories are scrollable */
     z-index: 1051;    /* Sit above the backdrop */
 }
+
+/*product card*/
+.card-img-container {
+    background-color: #f8f9fa;
+    aspect-ratio: 1 / 1; /* Forces a perfect square */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures image fills the square without stretching */
+    transition: transform 0.5s ease;
+}
+.product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.product-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Use 'cover' if you want images to fill the whole square */
+    transition: transform 0.5s ease;
+}
+
+
+.btn-quickview {
+   opacity: 0 !important; /* Hide it initially */
+    visibility: hidden;
+    transition: all 0.3s ease-in-out;
+    z-index: 10; /* Sit on top of the image */
+    bottom: 0px !important; /* Start slightly lower */
+    /* background: #ffffff; */
+    color: #000;
+    background-color: var(--primary-color) !important; /* Bootstrap Primary Blue */
+    color: #ffffff !important;           /* Pure White Text */
+    border: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+
+}
+
+
+.product-title {
+    font-size: 0.95rem;
+    letter-spacing: -0.02em;
+}
+
+.x-small {
+    font-size: 0.75rem;
+}
+
+.product-card .position-relative.overflow-hidden {
+    aspect-ratio: 1 / 1; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa; /* Keeps the 'bg-light' consistent */
+    cursor: pointer;
+}
+
+
+
 /* Product Card Hover Effects */
 .product-card .bg-light {
     transition: all 0.3s ease;
@@ -118,17 +185,45 @@ body{
     background-color: #e9ecef !important;
 }
 
-.product-card:hover .btn-quickview {
-    opacity: 1 !important;
-    bottom: 10px !important;
+.product-card:hover img {
+    transform: scale(1.08);
 }
 
-.btn-quickview {
+.product-card:hover {
+    transform: translateY(-5px); /* Subtle lift */
+}
+
+.product-card:hover .img-wrapper img {
+    transform: scale(1.1); /* Zoom effect on image */
+}
+
+.product-card:hover .btn-quickview {
+    opacity: 1 !important;
+    visibility: visible;
+    bottom: 15px !important; /* Slide up into position */
+}
+.product-card:hover .position-relative::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.05); /* Very subtle dimming */
+    pointer-events: none;
+}
+
+/* .product-card:hover .btn-quickview {
+    opacity: 1 !important;
+    bottom: 10px !important;
+} */
+
+/* .btn-quickview {
     transition: all 0.3s ease;
-    background: white;
+    background: var(--primary-color);
     font-size: 0.8rem;
     font-weight: bold;
-}
+} */
 
 
 
