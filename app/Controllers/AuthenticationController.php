@@ -50,7 +50,12 @@ class AuthenticationController extends Controller
     }
     public function userindex():ResponseInterface{
         
-        return $this->render("home/index1");;
+        return $this->render("customer/home");;
+        
+    }
+    public function userwithshopindex():ResponseInterface{
+        
+        return $this->render("customer/homeShop");;
         
     }
 
@@ -248,7 +253,7 @@ class AuthenticationController extends Controller
                 }
             }
             if($missing_input==0){
-                $stmt = $pdo->prepare("SELECT cust_id, cust_password,email_verified FROM customer WHERE cust_email = :email");
+                $stmt = $pdo->prepare("SELECT cust_id, cust_password,email_verified, cust_hasshop FROM customer WHERE cust_email = :email");
                 $stmt->execute(['email' => $customer["cust_email"]]);
                 $customer_db = $stmt->fetch(PDO::FETCH_ASSOC);
                 
@@ -259,14 +264,26 @@ class AuthenticationController extends Controller
                 }     
             
                 //login logic
+                // case credentials  ok
                 if($customer_db['email_verified']=="yes" && password_verify($customer["cust_password"], $customer_db['cust_password'])){
                     session_start();
                     $_SESSION['cust_id']=$customer_db["cust_id"];
-                    Header("Location:user_home"); 
-                    exit;  
+                    // Header("Location:user_home");
+                    if($customer_db['cust_hasshop']=="no"){
+                        //case user doesn't have a shop
+                        Header("Location:/user_home"); 
+                        exit;  
+                    }elseif($customer_db['cust_hasshop']=="yes"){
+                        //case user has a shop
+                        Header("Location:/home_usershop"); 
+                        exit;
+                    }
+                    
+                    // case incorect password
                 }elseif(!password_verify($customer["cust_password"], $customer_db['cust_password'])){
                     return $this->render("Auth/login",["error"=>"Password is incorrect"]);
                     exit;
+                    //case email not verified
                 }elseif($customer_db['email_verified']=="no"){
                     return $this->render("Auth/emailverify",["erremail"=>"Verify your email first"]);
                     exit;

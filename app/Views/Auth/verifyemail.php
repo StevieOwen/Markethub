@@ -1,5 +1,5 @@
 
-<?php $this->layout("/Auth/layout",["title"=>"Registration","stylename"=>"registration"]) ?>
+<?php $this->layout("/Auth/layout",["title"=>"Verify Email","stylename"=>"registration"]) ?>
 <!-- <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/registration.css"> -->
  <?php 
  session_start();

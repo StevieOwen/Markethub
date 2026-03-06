@@ -8,12 +8,15 @@ $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 define('URLROOT', $_ENV['URL_ROOT']);
 define('SITENAME', $_ENV['APP_NAME']);
+define('APPROOT', dirname(__FILE__));
 
 use GuzzleHttp\Psr7\ServerRequest;
 use HttpSoft\Emitter\SapiEmitter;
 use League\Route\Router;
 use App\Controllers\HomeController;
 use App\Controllers\AuthenticationController;
+use App\Controllers\ShopController;
+use App\Controllers\ProductsController;
 use Framework\Template\PlatesRenderer;
 use Framework\Template\RendererInterface;
 use GuzzleHttp\Psr7\HttpFactory;
@@ -43,8 +46,16 @@ use League\Route\Strategy\ApplicationStrategy;
     $strategy->setContainer($container);
     $router->setStrategy($strategy);
 
+    // Home controller route
     $router->get("/",[HomeController::class,"index"]);
 
+    $router->get("/logout",[HomeController::class,"logout"]);
+    $router->post("/logout",[HomeController::class,"logout"]);
+
+    $router->get("/category",[HomeController::class,"category"]);
+    $router->get("/categoryfilter",[HomeController::class,"filtercategory"]);
+    $router->post("/categoryfilter",[HomeController::class,"filtercategory"]);
+    // Authentication routes
     $router->get("/register",[AuthenticationController::class,"register"]);
 
     $router->get("/login",[AuthenticationController::class,"login"]);
@@ -60,6 +71,7 @@ use League\Route\Strategy\ApplicationStrategy;
     $router->post("/loginprocess",[AuthenticationController::class,"loginhandling"]);
 
     $router->get("/user_home",[AuthenticationController::class,"userindex"]);
+    $router->get("/home_usershop",[AuthenticationController::class,"userwithshopindex"]);
     $router->get("/passwordrecovery",[AuthenticationController::class,"passwordrecovery"]);
     $router->post("/passwordrecovery",[AuthenticationController::class,"passwordrecovery"]);
 
@@ -68,6 +80,37 @@ use League\Route\Strategy\ApplicationStrategy;
     
     $router->get("/changepassword",[AuthenticationController::class,"changepassword"]);
     $router->post("/changepassword",[AuthenticationController::class,"changepassword"]);
+
+    $router->get("/shopregistrationform",[ShopController::class,"shopcreationform"]);
+
+    $router->post("/registerShop",[ShopController::class,"shopregistrationprocess"]);
+    $router->get("/registerShop",[ShopController::class,"shopregistrationprocess"]);
+
+    $router->get("/dashboard",[ShopController::class,"renderDashboard"]);
+
+    $router->post("/renderShopInfos",[ShopController::class,"renderShopInfos"]);
+    $router->get("/renderShopInfos",[ShopController::class,"renderShopInfos"]);
+
+    $router->post("/addProduct",[ProductsController::class,"addProduct"]);
+    $router->get("/addProduct",[ProductsController::class,"addProduct"]);
+
+    $router->post("/renderproducts",[ProductsController::class,"renderProducts"]);
+    $router->get("/renderproducts",[ProductsController::class,"renderProducts"]);
+
+    $router->post("/deleteProduct",[ProductsController::class,"deleteProduct"]);
+    $router->get("/deleteProduct",[ProductsController::class,"deleteProduct"]);
+
+    $router->post("/editProduct",[ProductsController::class,"editProduct"]);
+    $router->get("/editProduct",[ProductsController::class,"editProduct"]);
+
+    $router->post("/showProductEdit",[ProductsController::class,"showProductEdit"]);
+    $router->get("/showProductEdit",[ProductsController::class,"showProductEdit"]);
+
+    $router->post("/checkshop",[ProductsController::class,"checkshop"]);
+    $router->get("/checkshop",[ProductsController::class,"checkshop"]);
+
+
+    $router->get("/renderedit",[ProductsController::class,"renderedit"]);
 
     try {
         $response=$router->dispatch($request);           

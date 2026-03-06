@@ -1,3 +1,4 @@
+<?php include APPROOT . "/Views/inc/header.php";?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,98 +6,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="<?php echo URLROOT;?>/css/<?= $this->e($stylename) ?>.css">
-    <link rel="stylesheet" href="<?php echo URLROOT;?>/css/navbar.css">
+    <!-- <link rel="stylesheet" href="<?php echo URLROOT;?>/css/navbar.css"> -->
     <title><?=  $this->e($title) ?></title>
 </head>
 <body>
 
+ <?=   $this->section("content") ;?>
 
-<nav class="navbar navbar-expand-lg bg-body-tertiary  border-bottom border-body" >
-  <div class="container-fluid">
-    <!-- Logo -->
-     <div class="col-4">
-        <h2>Logo</h2>
-     </div>  
-      <!-- togler button    -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse " id="navbarSupportedContent">
-        
-      <div class="d-flex mb-3 mb-md-0" style="width:50%">
-        <form class="d-flex flex-grow-1"  role="search">
-            <input class="form-control me-2" type="search" placeholder="Look for a product" aria-label="Search"/>
-            <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
-      </div>
-      <ul class="navbar-nav  mb-2 mb-lg-0 ms-auto d-flex flex-row gap-3 authbut">
-        <li class="nav-item" id="login" >
-          <a class="nav-link" aria-current="page" href="login">Login</a>
-        </li>
-        <li class="nav-item" id="register" > 
-          <a class="nav-link"  href="register">Register</a>
-        </li>
-          
-      </ul>
-       
-    </div>
-  </div>
-</nav>
+ 
+<!-- Main-section -->
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <!-- <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        
-        <div class="container-fluid">
-            
-            <div class="col-4">
-                <h2>Logo</h2>
-            </div>   
-    
-            <div class="col-4" >
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Look for a product" aria-label="Search"/>
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
+<div class="container my-5">
+    <div class="row">
+        <button class="btn btn-outline-primary d-lg-none mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+          <i class="bi bi-funnel">Filter & Categories</i> 
+        </button>
+        <aside class="offcanvas-lg offcanvas-start col-lg-3" tabindex="-1" id="sidebarOffcanvas">
+            <div class="offcanvas-header d-lg-none">
+                <h5 class="offcanvas-title">Filters</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sidebarOffcanvas"></button>
             </div>
-            
-            <div class="col-4 auth" >
-                <div class="authbut">
-                    <span id="login"><a href="login">Login</a></span> /
-                    <span id="register"><a href="register">Register</a></span>
+
+            <div class="offcanvas-body p-lg-0 d-block">
+                <div class="filter-group mb-4">
+                    <h5 class="fw-bold">Categories</h5>
+                        
+                        <ul class="list-unstyled" id="category">
+                            
+                        </ul>
+                        
                 </div>
             </div>
+        </aside>
 
-        </div>   
-       
-    </nav>
+        <main class="col-lg-9 col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <span class="text-muted">Showing 1-12 of 120 results</span>
+                <select class="form-select w-auto">
+                    <option>Default Sorting</option>
+                    <option>Price: Low to High</option>
+                </select>
+            </div>
+            <!-- Products grid -->
+              
+              <div class="row g-4 products-grid">
+                
+                  
+                
 
-
-
-
-
-    
-    <div class="container" >
-        <div class="row justify-content-around" >
-           
             
-        </div>
-    </div> -->
+
+            
+
+
+        </main>
+    </div>
+</div>
 
 
 
- <?=   $this->section("content") ;?>
- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+<script src="<?php echo URLROOT;?>/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>

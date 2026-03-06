@@ -7,9 +7,142 @@
     --input-text:#212121;
     --font--1:Linden Hill;
     --input-background--2:#641314;
+    --secondary-color:#326273;
 }
 
 body{
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
+}
+
+
+/* Call to action Section*/
+.seller-cta-banner {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    border: 1px solid rgba(13, 110, 253, 0.1);
+}
+
+/* Background decorative shapes */
+.shape-1, .shape-2 {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    filter: blur(60px);
+    z-index: 0;
+    opacity: 0.4;
+}
+
+.shape-1 {
+    background: #6f42c1; /* Purple from your reference */
+    top: -150px;
+    left: -100px;
+}
+
+.shape-2 {
+    background: #0d6efd; /* Market Hub Blue */
+    bottom: -150px;
+    right: -100px;
+}
+
+.z-1 {
+    z-index: 1;
+}
+
+/* Hover effect for the button */
+.btn-primary {
+    background-color: var(--primary-color) ;
+    color: var(--white-color) !important;
+} 
+.btn-primary.rounded-pill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(13, 110, 253, 0.2);
+    transition: all 0.3s ease;
+    background-color: var(--input-background--2);
+}
+
+/* Prevent text from wrapping inside buttons on mobile */
+.btn.rounded-pill {
+    background-color: var(--primary-color);
+    white-space: nowrap; 
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 1rem; /* Adjust if the text is too large for the screen */
+}
+
+@media (max-width: 576px) {
+    .btn.rounded-pill {
+        background-color: var(--primary-color);
+        width: 100%; /* Make them stack neatly on phones */
+        padding-top: 15px;
+        padding-bottom: 15px;
+        font-size: 0.9rem;
+    }
+}
+
+
+
+
+/* Category-Grid-section*/
+#category-section-title{
+    text-align: center;
+    color: var(--primary-color);
+}
+
+/* Style for Main Section */
+/* Sidebar Styling */
+.filter-group h5 {
+    font-size: 1rem;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.filter-group ul li {
+    padding: 5px 0;
+    color: #666;
+}
+.offcanvas-body {
+    overflow-y: auto; /* Ensure you can scroll the categories */
+    z-index: 1051;    /* Sit above the backdrop */
+}
+/* Product Card Hover Effects */
+.product-card .bg-light {
+    transition: all 0.3s ease;
+}
+
+.product-card:hover .bg-light {
+    background-color: #e9ecef !important;
+}
+
+.product-card:hover .btn-quickview {
+    opacity: 1 !important;
+    bottom: 10px !important;
+}
+
+.btn-quickview {
+    transition: all 0.3s ease;
+    background: white;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+
+
+
+/* Mobile adjustments for Carousel */
+@media (max-width: 767px) {
+    .carousel-caption {
+        bottom: 5px; /* Pulls text down so it doesn't sit on the product */
+    }
+    .carousel-caption h5 {
+        font-size: 1.1rem;
+    }
+    .carousel-caption p {
+        font-size: 0.85rem;
+        display: none; /* Optional: Hide the long description on tiny phones to save space */
+    }
 }
